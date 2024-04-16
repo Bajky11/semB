@@ -1,44 +1,60 @@
-﻿using System;
+﻿using semB.src.PriorityGenerators;
+using System;
 
 namespace semB.src.Treep
 {
-    class Node<K, P> where K : IComparable<K> where P : IComparable<P>
-    {
-        public K Key { get; set; } // Klíč uzlu
-        public P Priority { get; set; } // Priorita uzlu
-        public Node<K, P> Left { get; set; } // Levý potomek
-        public Node<K, P> Right { get; set; } // Pravý potomek
 
-        // Konstruktor pro inicializaci uzlu s klíčem a prioritou
-        public Node(K key, P priority)
+
+    class Treap<K, P> : IEnumerable<Treap<K, P>.Node>, ITreap<K> where K : IComparable<K> where P : IComparable<P>
+    {
+        private class Node
         {
-            Key = key;
-            Priority = priority;
+            public K Key { get; set; }
+            public P Priority { get; set; }
+            public Node? Left { get; set; }
+            public Node? Right { get; set; }
+
+            public Node(K key, P priority)
+            {
+                Key = key;
+                Priority = priority;
+                Left = null;
+                Right = null;
+            }
+
+            public override string ToString()
+            {
+                var leftKey = Left?.Key.ToString() ?? "null";
+                var rightKey = Right?.Key.ToString() ?? "null";
+                return $"{leftKey} <-({Key}:{Priority})-> {rightKey}";
+            }
         }
 
-        // Přepsání metody ToString pro lepší vizualizaci uzlu
-        public override string ToString()
-        {
-            var leftPriority = Left?.Priority.ToString() ?? "null"; // Priorita levého potomka nebo "null"
-            var rightPriority = Right?.Priority.ToString() ?? "null"; // Priorita pravého potomka nebo "null"
-            return $"{leftPriority} <-({Key}:{Priority})-> {rightPriority}";
-        }
-    }
+        private Node? Root { get; set; } // Kořenový uzel stromu
+        private IPriorityGenerator<P> PriorityGenerator;
 
-    class Treap<K, P> : ITreep<K, P> where K : IComparable<K> where P : IComparable<P>
-    {
-        public Node<K, P> Root { get; private set; } // Kořenový uzel stromu
+        public Treap(IPriorityGenerator<P> generator)
+        {
+            Root = null;
+            PriorityGenerator = generator;
+        }
 
         // Metoda pro vkládání uzlu do stromu
-        public void Insert(K key, P priority)
+        private void Insert(K key, P priority)
         {
             Root = InsertRecursive(Root, key, priority);
         }
 
-        // Rekurzivní pomocná metoda pro vkládání uzlu
-        private Node<K, P> InsertRecursive(Node<K, P> node, K key, P priority)
+        // Metoda pro vkládání uzlu do stromu
+        public void Insert(K key)
         {
-            if (node == null) return new Node<K, P>(key, priority); // Vytvoření nového uzlu, pokud je místo prázdné
+            Root = InsertRecursive(Root, key, PriorityGenerator.Next());
+        }
+
+        // Rekurzivní pomocná metoda pro vkládání uzlu
+        private Node InsertRecursive(Node node, K key, P priority)
+        {
+            if (node == null) return new Node(key, priority); // Vytvoření nového uzlu, pokud je místo prázdné
 
             int comparison = key.CompareTo(node.Key); // Porovnání klíčů
             if (comparison < 0)
@@ -57,31 +73,31 @@ namespace semB.src.Treep
         }
 
         // Rotace uzlu doprava
-        private Node<K, P> RotateRight(Node<K, P> node)
+        private Node RotateRight(Node node)
         {
-            Node<K, P> temp = node.Left; // Uložení levého potomka
+            Node temp = node.Left; // Uložení levého potomka
             node.Left = temp.Right; // Přesun pravého potomka levého uzlu na místo původního uzlu
             temp.Right = node; // Nastavení původního uzlu jako pravého potomka
             return temp; // Vrácení nového kořenového uzlu
         }
 
         // Rotace uzlu doleva
-        private Node<K, P> RotateLeft(Node<K, P> node)
+        private Node RotateLeft(Node node)
         {
-            Node<K, P> temp = node.Right; // Uložení pravého potomka
+            Node temp = node.Right; // Uložení pravého potomka
             node.Right = temp.Left; // Přesun levého potomka pravého uzlu na místo původního uzlu
             temp.Left = node; // Nastavení původního uzlu jako levého potomka
             return temp; // Vrácení nového kořenového uzlu
         }
 
         // Metoda pro vyhledávání uzlu podle klíče
-        public Node<K, P> Find(K key)
+        public object Find(K key)
         {
             return FindRecursive(Root, key);
         }
 
         // Rekurzivní pomocná metoda pro vyhledávání
-        private Node<K, P> FindRecursive(Node<K, P> node, K key)
+        private Node FindRecursive(Node node, K key)
         {
             if (node == null) return null; // Vrácení null, pokud uzel není nalezen
 
@@ -91,18 +107,16 @@ namespace semB.src.Treep
             else return FindRecursive(node.Right, key); // Vyhledávání v pravém podstromu
         }
 
-
-
         // Metoda pro odstranění uzlu
-        public Node<K, P> Delete(K key)
+        public object Delete(K key)
         {
-            Node<K, P> deletedNode;
+            Node deletedNode;
             Root = DeleteRecursive(Root, key, out deletedNode);
             return deletedNode;
         }
 
         // Rekurzivní pomocná metoda pro odstranění uzlu
-        private Node<K, P> DeleteRecursive(Node<K, P> node, K key, out Node<K, P> deletedNode)
+        private Node DeleteRecursive(Node node, K key, out Node deletedNode)
         {
             deletedNode = null;
             if (node == null) return null;
@@ -113,7 +127,7 @@ namespace semB.src.Treep
             else
             {
                 // Případ, kdy je třeba uzel odstranit
-                deletedNode = node; // The node to be deleted is found
+                deletedNode = node;
                 if (node.Left == null) return node.Right;
                 if (node.Right == null) return node.Left;
 
@@ -138,21 +152,28 @@ namespace semB.src.Treep
             return GetHeightRecursive(Root);
         }
 
-        // Rekurzivní pomocná meotda pro výpočet výšky stromu
-        private int GetHeightRecursive(Node<K, P> node)
+        // Rekurzivní pomocná metoda pro výpočet výšky stromu
+        private int GetHeightRecursive(Node node)
         {
-            if (node == null) return 0; // Výska neinicializovaného stromu je 0
-            // Výpočet výsky každého podstromu a přičtení 1 pro akttální node
-            return 1 + Math.Max(GetHeightRecursive(node.Left), GetHeightRecursive(node.Right));
+            if (node == null) return 0; // Výška neinicializovaného stromu je 0
+            //if (node.Left == null && node.Right == null) return 1; // Výška stromu s jediným uzlem je 1
+
+            int leftHeight = GetHeightRecursive(node.Left);
+            int rightHeight = GetHeightRecursive(node.Right);
+
+            // Výpočet maximální výšky mezi levým a pravým podstromem a přidání 1 pro aktuální uzel
+            return 1 + Math.Max(leftHeight, rightHeight);
         }
 
+
+        // Metoda pro zobrazení stromu
         public void DisplayTree(int? spacing = 5)
         {
             DisplayTreeRecursive(Root, 0, "none", spacing);
         }
 
         // Rekurzivní pomocná metoda pro vizualizaci stromu
-        private void DisplayTreeRecursive(Node<K, P> node, int space, string direction, int? spacing)
+        private void DisplayTreeRecursive(Node node, int space, string direction, int? spacing)
         {
             if (node == null) return; // Pokud uzel neexistuje, ukončí se rekurze
 
@@ -163,5 +184,63 @@ namespace semB.src.Treep
             Console.WriteLine(new string(' ', space) + (direction == "left" ? "/" : direction == "right" ? "\\" : "-") + node.Key + "(" + node.Priority + ")");
             DisplayTreeRecursive(node.Left, space, "right", spacing); // Rekurze pro levý podstrom
         }
+
+        public void SaveToFile(string filePath)
+        {
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                foreach (var node in this)
+                {
+                    writer.WriteLine($"{node.Key},{node.Priority}");
+                }
+            }
+        }
+
+        public void LoadFromFile(string filePath)
+        {
+            string[] lines = File.ReadAllLines(filePath);
+
+            foreach (var line in lines)
+            {
+                string[] parts = line.Split(',');
+                K key = (K)Convert.ChangeType(parts[0], typeof(K));
+                P priority = (P)Convert.ChangeType(parts[1], typeof(P));
+                Insert(key, priority);
+            }
+        }
+
+        private IEnumerator<Node> GetEnumerator()
+        {
+            return InOrderTraversal(Root).GetEnumerator();
+        }
+
+        private IEnumerable<Node> InOrderTraversal(Node node)
+        {
+            if (node != null)
+            {
+                foreach (var leftNode in InOrderTraversal(node.Left))
+                {
+                    yield return leftNode;
+                }
+
+                yield return node;
+
+                foreach (var rightNode in InOrderTraversal(node.Right))
+                {
+                    yield return rightNode;
+                }
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        IEnumerator<Treap<K, P>.Node> IEnumerable<Treap<K, P>.Node>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
     }
 }
+

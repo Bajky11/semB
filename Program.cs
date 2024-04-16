@@ -1,102 +1,116 @@
 ﻿using semB.src.Experiments.Treep;
-using semB.src.Experiments;
 using semB.src.Treep;
+using semB.src;
+using semB.src.PriorityGenerators;
 
-Treap<int, int> treap = new();
+Treap<int, int> treap = new(new IntPriorityGenerator());
 bool exit = false;
 
 while (!exit)
 {
-    Console.WriteLine("Choose an action:");
-    Console.WriteLine("1 - Insert key and priority");
-    Console.WriteLine("2 - Delete key");
-    Console.WriteLine("3 - Find key");
-    Console.WriteLine("4 - Display tree");
-    Console.WriteLine("5 - Get tree height");
-    Console.WriteLine("6 - Run experiments");
-    Console.WriteLine("0 - Exit");
+    Console.WriteLine("Vyberte akci:");
+    Console.WriteLine("1 - Vložit klíč");
+    Console.WriteLine("2 - Smazat klíč");
+    Console.WriteLine("3 - Najít klíč");
+    Console.WriteLine("4 - Zobrazit strom");
+    Console.WriteLine("5 - Získat výšku stromu");
+    Console.WriteLine("6 - Spustit experimenty");
+    Console.WriteLine("7 - Načíst ze souboru");
+    Console.WriteLine("8 - Uložit do souboru");
+    Console.WriteLine("0 - Ukončit");
 
-    string choice = Console.ReadLine();
+    string volba = Console.ReadLine();
 
-    switch (choice)
+    switch (volba)
     {
         case "1":
-            Console.WriteLine("Enter key:");
-            int key = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine("Enter priority:");
-            int priority = Convert.ToInt32(Console.ReadLine());
-            treap.Insert(key, priority);
+            Console.WriteLine("Zadejte klíč:");
+            if (int.TryParse(Console.ReadLine(), out int klic1))
+            {
+                treap.Insert(klic1);
+            }
+            else
+            {
+                Console.WriteLine("Neplatný vstup, očekává se celé číslo.");
+            }
             break;
         case "2":
-            Console.WriteLine("Enter key to delete:");
-            key = Convert.ToInt32(Console.ReadLine());
-            treap.Delete(key);
+            Console.WriteLine("Zadejte klíč k odstranění:");
+            if (int.TryParse(Console.ReadLine(), out int klic2))
+            {
+                treap.Delete(klic2);
+            }
+            else
+            {
+                Console.WriteLine("Neplatný vstup, očekává se celé číslo.");
+            }
             break;
         case "3":
-            Console.WriteLine("Enter key to find:");
-            key = Convert.ToInt32(Console.ReadLine());
-            var node = treap.Find(key);
-            Console.WriteLine(node != null ? $"Found: {node.Key}" : "Not found");
+            Console.WriteLine("Zadejte klíč k nalezení:");
+            if (int.TryParse(Console.ReadLine(), out int klic3))
+            {
+                var uzel = treap.Find(klic3);
+                Console.WriteLine(uzel != null ? $"Nalezeno: {uzel}" : "Nenalezeno");
+            }
+            else
+            {
+                Console.WriteLine("Neplatný vstup, očekává se celé číslo.");
+            }
             break;
         case "4":
-            treap.DisplayTree();
+            treap.DisplayTree(10);
             break;
         case "5":
-            int height = treap.GetHeight();
-            Console.WriteLine($"Tree height: {height}");
+            int vyska = treap.GetHeight();
+            Console.WriteLine($"Výška stromu: {vyska}");
             break;
         case "6":
-            SelectAndRunExperiment();
+            VybratASpustitExperiment();
+            break;
+        case "7":
+            Persistence<int, int>.LoadTreapFromFile(treap);
+            break;
+        case "8":
+            Persistence<int, int>.SaveTreapToFile(treap);
             break;
         case "0":
             exit = true;
             break;
         default:
-            Console.WriteLine("Invalid choice, please try again.");
+            Console.WriteLine("Neplatná volba, zkuste to znovu.");
             break;
     }
 }
 
-static void SelectAndRunExperiment()
+static void VybratASpustitExperiment()
 {
-    bool back = false;
+    bool zpet = false;
 
-    while (!back)
+    while (!zpet)
     {
-        Console.WriteLine("Select an experiment to run:");
-        Console.WriteLine("1 - Basic Experiments");
-        Console.WriteLine("2 - City Names Experiment");
-        Console.WriteLine("3 - Statistic Experiment");
-        Console.WriteLine("4 - Binary Search Tree Experiments");
-        Console.WriteLine("0 - Back to main menu");
+        Console.WriteLine("Vyberte experiment k provedení:");
+        Console.WriteLine("1 - Experiment s názvy měst");
+        Console.WriteLine("2 - Statistický experiment");
+        Console.WriteLine("0 - Zpět do hlavního menu");
 
-        string experimentChoice = Console.ReadLine();
+        string volbaExperimentu = Console.ReadLine();
 
-        switch (experimentChoice)
+        switch (volbaExperimentu)
         {
             case "1":
-                var basicExperiment = new BasicExperiments();
-                BasicExperiments.Experiment();
-                break;
-            case "2":
-                var cityNamesExperiment = new CityNamesExperiment();
+                var experimentSNázvyMěst = new CityNamesExperiment();
                 CityNamesExperiment.Experiment();
                 break;
-            case "3":
-                var statisticExperiment = new StatisticExperiment();
+            case "2":
+                var statistickyExperiment = new StatisticExperiment();
                 StatisticExperiment.Experiment();
                 break;
-            case "4":
-                var binarySearchTreeExperiments = new BinarySearchTreeExperiments();
-                BinarySearchTreeExperiments.Experiment();
-                break;
             case "0":
-                back = true;
+                zpet = true;
                 break;
             default:
-                Console.WriteLine("Invalid choice, please try again.");
+                Console.WriteLine("Neplatná volba, zkuste to znovu.");
                 break;
         }
     }
 }
-

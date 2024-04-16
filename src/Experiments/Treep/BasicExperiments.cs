@@ -1,4 +1,5 @@
-﻿using semB.src.Treep;
+﻿using semB.src.PriorityGenerators;
+using semB.src.Treep;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace semB.src.Experiments.Treep
 {
     internal class BasicExperiments
     {
+        /*
         public static void Experiment()
         {
             Console.WriteLine("EXPERIMENT: ADDITION");
@@ -19,7 +21,7 @@ namespace semB.src.Experiments.Treep
 
         private static void NNDSA_Deletion()
         {
-            Treap<string, int> treep = new();
+            Treap<string, int> treep = new(new IntPriorityGenerator());
             treep.Insert("G", 40);
             treep.Insert("E", 69);
             treep.Insert("X", 50);
@@ -40,7 +42,7 @@ namespace semB.src.Experiments.Treep
 
         private static void NNDSA_Addition()
         {
-            Treap<string, int> treep = new();
+            Treap<string, int> treep = new(new IntPriorityGenerator());
             treep.Insert("G", 4);
             treep.Insert("B", 7);
             treep.Insert("A", 10);
@@ -55,5 +57,6 @@ namespace semB.src.Experiments.Treep
 
             treep.DisplayTree();
         }
+        */
     }
 }

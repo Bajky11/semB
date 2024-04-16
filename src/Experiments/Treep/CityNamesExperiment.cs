@@ -1,4 +1,5 @@
-﻿using semB.src.Treep;
+﻿using semB.src.PriorityGenerators;
+using semB.src.Treep;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,32 +13,50 @@ namespace semB.src.Experiments.Treep
 
         public static void Experiment()
         {
-            Console.WriteLine("\n\nEXPERIMENT: MUNICIPALITY KEYS");
+            Console.WriteLine("\n\nEXPERIMENT S MĚSTY");
             MunicipalityKeysExperiment();
         }
 
         private static void MunicipalityKeysExperiment()
         {
-            Treap<string, int> treep = new Treap<string, int>();
-            Console.WriteLine("Municipality Keys Experiment: Insertion\n");
-            // Vkládání obcí s unikátními klíči
-            string[] municipalities = new string[] { "Praha", "Brno", "Ostrava", "Plzeň", "Liberec", "Olomouc", "Žamberk", "Náchod", "Jaroměř", "Pardubice" };
-            int value = 1;
-            foreach (var municipality in municipalities)
+            Treap<string, int> treap = new Treap<string, int>(new IntPriorityGenerator());
+
+            string[] cities = ["Praha", "Brno", "Ostrava", "Plzeň", "Liberec", "Olomouc", "Žamberk", "Náchod", "Jaroměř", "Pardubice"];
+            foreach (var city in cities)
             {
-                Console.WriteLine("Inserted: " + municipality + "\n");
-                treep.Insert(municipality, value++);
-                treep.DisplayTree(10); // Zobrazit strom po každém vložení
+                Console.WriteLine("Inserted: " + city + "\n");
+                treap.Insert(city);
+                Console.WriteLine("Height: " + treap.GetHeight());
+                treap.DisplayTree(10);
                 Console.WriteLine("-----------------------------------------------------------");
             }
-
-            Console.WriteLine("Municipality Keys Experiment: Deletion\n");
-            // Příklady mazání
-            treep.Delete("Plzeň");
-            treep.DisplayTree(10); // Zobrazit strom po mazání
+            Console.WriteLine("Experiment: Find Plzeň\n");
+            var uzel = treap.Find("Plzeň");
+            Console.WriteLine(uzel != null ? $"Nalezeno: {uzel}" : "Nenalezeno");
             Console.WriteLine("-----------------------------------------------------------");
 
-            // Doplnit další operace podle potřeby...
+            Console.WriteLine("Experiment: Deletion of Plzeň\n");
+            treap.Delete("Plzeň");
+            Console.WriteLine("Height: " + treap.GetHeight());
+            treap.DisplayTree(10);
+            Console.WriteLine("-----------------------------------------------------------");
+
+            Console.WriteLine("Experiment: Find Plzeň\n");
+            uzel = treap.Find("Plzeň");
+            Console.WriteLine(uzel != null ? $"Nalezeno: {uzel}" : "Nenalezeno");
+            Console.WriteLine("-----------------------------------------------------------");
+
+            Console.WriteLine("Experiment: Deletion of Náchod\n");
+            treap.Delete("Náchod");
+            Console.WriteLine("Height: " + treap.GetHeight());
+            treap.DisplayTree(10);
+            Console.WriteLine("-----------------------------------------------------------");
+
+            Console.WriteLine("Experiment: Deletion of Brno\n");
+            treap.Delete("Brno");
+            Console.WriteLine("Height: " + treap.GetHeight());
+            treap.DisplayTree(10);
+            Console.WriteLine("-----------------------------------------------------------");
         }
     }
 }
